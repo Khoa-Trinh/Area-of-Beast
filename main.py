@@ -1,9 +1,10 @@
 import pygame as py
+import settings as st
 import sys
 
 py.init()
 
-screen = py.display.set_mode((800, 800), py.RESIZABLE)
+screen = py.display.set_mode((st., py.RESIZABLE)
 
 running = True
 while running:
@@ -12,7 +13,6 @@ while running:
             running = False
 
     screen.fill(("red"))
-    screen.draw.polygon(screen, "magenta", )
     py.display.flip()
 py.clock.tick(60)
 py.quit()     
