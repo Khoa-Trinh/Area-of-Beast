@@ -5,19 +5,25 @@ pygame.init()
 screen = pygame.display.set_mode((800, 600))
 clock = pygame.time.Clock()
 
-# Scene cơ bản
-class Scene:
+# ✅ Lớp cơ sở cho tất cả Scene
+class BaseScene:
+    def __init__(self):
+        pass
+
     def update(self):
+        """Cập nhật logic của scene."""
         pass
 
     def render(self, screen):
+        """Vẽ nội dung của scene."""
         pass
 
     def handle_events(self, events):
+        """Xử lý sự kiện người chơi."""
         pass
 
-# Scene Menu
-class MainMenu(Scene):
+# ✅ Scene Menu kế thừa từ BaseScene
+class MenuScene(BaseScene):
     def render(self, screen):
         screen.fill((0, 0, 255))  # Màu xanh dương
         font = pygame.font.Font(None, 36)
@@ -27,11 +33,11 @@ class MainMenu(Scene):
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                return "gameplay"  # Chuyển sang scene game
+                return "gameplay"  # Chuyển sang scene gameplay
         return None
 
-# Scene Game
-class Gameplay(Scene):
+# ✅ Scene Gameplay kế thừa từ BaseScene
+class GameplayScene(BaseScene):
     def render(self, screen):
         screen.fill((0, 255, 0))  # Màu xanh lá
         font = pygame.font.Font(None, 36)
@@ -44,14 +50,14 @@ class Gameplay(Scene):
                 return "menu"  # Quay lại menu
         return None
 
-# Quản lý scene
+# ✅ Quản lý scene
 scenes = {
-    "menu": MainMenu(),
-    "gameplay": Gameplay(),
+    "menu": MenuScene(),
+    "gameplay": GameplayScene(),
 }
 current_scene = "menu"
 
-# Vòng lặp game
+# ✅ Vòng lặp game
 running = True
 while running:
     events = pygame.event.get()
