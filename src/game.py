@@ -11,8 +11,8 @@ class Game:
         pygame.display.set_caption("Arena of Beasts")
         self.clock = pygame.time.Clock()
         self.running = True
-        self.player1 = Player(100, 300, 'player1')
-        self.player2 = Player(600, 300, 'player2')
+        self.player1 = Player(100, 300)
+        self.player2 = Player(600, 300)
         self.input_handler = InputHandler()
         self.hud = HUD(self.screen, self.player1.health, self.player2.health)
 
@@ -62,7 +62,7 @@ class Game:
         self.hud.opponent_health = self.player2.health
 
     def render(self):
-        self.screen.fill((0, 0, 0))  # Clear screen with black
+        self.screen.fill((255, 0, 0))  # Clear screen with black
         self.player1.draw(self.screen)
         self.player2.draw(self.screen)
         self.hud.draw()

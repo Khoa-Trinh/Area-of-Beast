@@ -2,8 +2,16 @@ import pygame
 from utils.constants import MAX_HEALTH, WALK_SPEED, SIT_SPEED
 
 class Player:
-    def __init__(self, x, y, controls):
-        self.rect = pygame.Rect(x, y, 50, 50)
+    def __init__(self, x, y):
+        self.sprites = {
+            'idle': pygame.image.load('assets/images/character1/idle.png'),
+            # 'walk': pygame.image.load('assets/images/character1/move_right.png'),
+            # 'attack': pygame.image.load('assets/images/character1/attack.png'),
+            # 'jump': pygame.image.load('assets/images/character1/jump.png'),
+            # 'sit': pygame.image.load('assets/images/character1/sit.png'),
+        }
+        size = self.sprites['idle'].get_size()
+        self.rect = pygame.Rect(x, y, size[0], size[1])
         self.health = MAX_HEALTH
         self.is_jumping = False
         self.is_sitting = False
@@ -13,15 +21,7 @@ class Player:
         self.velocity_y = 0
         self.gravity = 0.5
         self.hitbox = pygame.Rect(x, y, 50, 50)  # Placeholder for hitbox
-        self.hurtbox = pygame.Rect(x, y, 50, 50)  # Placeholder for hurtbox
-        self.controls = controls
-        self.sprites = {
-            'idle': pygame.image.load('assets/images/character1/idle.png'),
-            # 'walk': pygame.image.load('assets/images/character1/move_right.png'),
-            # 'attack': pygame.image.load('assets/images/character1/attack.png'),
-            # 'jump': pygame.image.load('assets/images/character1/jump.png'),
-            # 'sit': pygame.image.load('assets/images/character1/sit.png'),
-        }
+        self.hurtbox = pygame.Rect(x, y, size[0], size[1])  # Placeholder for hurtbox
         self.current_sprite = self.sprites['idle']
         self.original_sprite = self.current_sprite  # Store the original sprite
         self.attack_frame = 0
@@ -91,6 +91,9 @@ class Player:
 
     def draw(self, surface):
         surface.blit(self.current_sprite, (self.rect.x, self.rect.y))
+        pygame.draw.rect(surface, (255, 0, 0), self.hurtbox, 2)
+   # def render(self, surface, rect):
+   #     surface.blit(surface, (rect.x - camera.x, rect.y - camera.y))
 
     def face_direction(self, other_player):
         if self.rect.x > other_player.rect.x:
@@ -106,8 +109,9 @@ class Player:
 
     def update_hitbox(self):
         # Update hitbox based on character's position and state
-        self.hitbox = self.rect.inflate(20, 20)  # Example hitbox size
+        self.hitbox = self.rect.inflate(20, 20)
+       # self.hitbox.topleft = self.rect.topleft  # Example hitbox size
 
     def update_hurtbox(self):
-        # Update hurtbox based on character's position and state
-        self.hurtbox = self.rect.inflate(-10, -10)  # Example hurtbox size
+          # Example hurtbox size
+        self.hurtbox.topleft=self.rect.topleft
