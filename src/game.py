@@ -62,7 +62,7 @@ class Game:
         self.hud.opponent_health = self.player2.health
 
     def render(self):
-        self.screen.fill((255, 0, 0))  # Clear screen with black
+        self.screen.fill((0, 0, 0))  # Clear screen with black
         self.player1.draw(self.screen)
         self.player2.draw(self.screen)
         self.hud.draw()
