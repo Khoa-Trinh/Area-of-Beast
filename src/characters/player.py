@@ -6,7 +6,7 @@ class Player:
         # Load sprites
         self.sprites = {
             'idle': pygame.image.load('assets/images/character1/idle.png'),
-            'attack': pygame.image.load('assets/images/character1/attack.png'),  # Sprite với lưỡi
+            'attack': pygame.image.load('assets/images/character1/idle.png'),  # Sprite với lưỡi
         }
         # Dùng mask để lấy kích thước thân chính từ idle sprite
         mask = pygame.mask.from_surface(self.sprites['idle'])

@@ -1,4 +1,4 @@
-import pygame function as pf
+import pygamefunction as pf
 import pygame as py
 import sys
 
