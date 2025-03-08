@@ -21,9 +21,14 @@ class Main:
         # Screen
         self.screen.fill(white)
 
-        # Player
-        self.player = Player(self.clock)
-        self.player.draw(self.screen.screen)
+        # Player 1
+        self.player_1 = Player(self.clock, 'wasd')
+        self.player_1.draw(self.screen.screen)
+
+        # Player 2
+        self.player_2 = Player(self.clock, 'arrow')
+        self.player_2.draw(self.screen.screen)
+
         self.screen.flip()
 
     def run(self):
@@ -35,9 +40,10 @@ class Main:
                     self.running = False
 
             self.screen.fill(white)
-            self.player.action(self.screen.screen, self.dt)
-
             self.screen.get_FPS()
+
+            self.player_1.action(self.screen.screen, self.dt)
+            self.player_2.action(self.screen.screen, self.dt)
 
             self.screen.flip()
 
