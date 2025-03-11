@@ -44,9 +44,10 @@ class Skill1:
             return (
                 minmax(cur_x - self.width / 2, width_limit),
                 minmax(cur_y - self.height / 2, height_limit),
+                True
             )
 
-        return x, y
+        return x, y, False
 
 
 class Skill2:
@@ -55,7 +56,7 @@ class Skill2:
         self.height = height
         self.direction = None
         self.distance = None
-        self.deviation_values = [-100, 134, -120, 200, -114]
+        self.deviation_values = [-100, 200, -200, 200, -100]
 
     def action(
         self,

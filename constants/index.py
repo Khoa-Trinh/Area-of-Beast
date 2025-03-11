@@ -21,7 +21,5 @@ plr_x, plr_y, plr_height, plr_width, plr_color = (
 )
 
 # Skill
-skill_1_cooldown_duration = 250
-skill_1_distance = 200
-skill_2_cooldown_duration = 750
-skill_2_distance = 500
+skill_1_cooldown_duration, skill_1_distance, skill_1_speed = 250, 150, 10
+skill_2_cooldown_duration, skill_2_distance, skill_2_speed = 750, 450, 2
