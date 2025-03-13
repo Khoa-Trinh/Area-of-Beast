@@ -7,8 +7,9 @@ from functions.scenes.sceneManager import SceneManager
 class Main:
     def __init__(self):
         py.init()
-        scene = StartScene()
-        self.manager = SceneManager(scene)
+        self.manager = SceneManager()
+        scene = StartScene(self.manager)
+        self.manager.active = scene
 
     def run(self):
         self.manager.run()

@@ -5,7 +5,7 @@ from constants.index import height, width, green
 
 class Screen:
     def __init__(self, clock: py.time.Clock):
-        self.screen = py.display.set_mode((height, width))
+        self.screen = py.display.set_mode((width, height))
         self.font = py.font.Font(py.font.match_font("roboto"), 24)
         self.clock = clock
 

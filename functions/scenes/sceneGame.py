@@ -7,14 +7,18 @@ from constants.index import white, plr_y, plr_width, plr_height, plr_color
 
 
 class GameScene(Scene):
-    def __init__(self):
+    def __init__(self, manager):
         # Initialize clock and screen
         self.clock = py.time.Clock()
         self.screen = Screen(self.clock)
-        py.display.set_caption('Game Scene')
+        py.display.set_caption("Game Scene")
 
         # Running
         self.running = True
+        self._next_scene = self
+
+        # Manager
+        self.manager = manager
 
         # Screen
         self.screen.fill(white)
@@ -50,4 +54,4 @@ class GameScene(Scene):
         self.screen.flip()
 
     def next_scene(self):
-        return self
+        return self._next_scene

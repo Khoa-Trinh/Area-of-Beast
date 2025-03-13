@@ -1,5 +1,5 @@
 # Settings
-height, width = 800, 600
+height, width = 600, 800
 caption = "Game"
 
 # Colors

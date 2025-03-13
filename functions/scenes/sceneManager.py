@@ -5,8 +5,9 @@ from functions.scenes.sceneBase import Scene
 
 
 class SceneManager:
-    def __init__(self, init: Scene):
-        self.active = init
+    def __init__(self):
+        self.active: Scene = None
+        self.data = {}
 
     def run(self):
         while self.active.running:
