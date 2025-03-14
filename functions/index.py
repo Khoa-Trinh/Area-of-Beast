@@ -10,6 +10,4 @@ class Main:
         self.manager = SceneManager()
         scene = StartScene(self.manager)
         self.manager.active = scene
-
-    def run(self):
         self.manager.run()

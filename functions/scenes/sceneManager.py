@@ -13,10 +13,14 @@ class SceneManager:
         while self.active.running:
             events = py.event.get()
 
-            self.active.handle_events(events)
-            self.active.update()
-            self.active.render()
-            self.active = self.active.next_scene()
+            try:
+                self.active.handle_events(events)
+                self.active.update()
+                self.active.render()
+                self.active = self.active.next_scene()
+
+            except Exception as e:
+                print(e)
 
         py.quit()
         sys.exit()

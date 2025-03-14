@@ -31,13 +31,6 @@ class StartScene:
             self.start,
         )
 
-        # Screen
-        self.screen.fill(white)
-
-        # Draw
-        self.button.draw(self.screen.screen)
-        self.screen.flip()
-
     def start(self):
         from functions.scenes.scenePickMode import PickModeScene
 
@@ -50,8 +43,9 @@ class StartScene:
             self.button.handle_event(e)
 
     def update(self):
-        # Update screen
-        pass
+        self.screen.fill(white)
+        self.button.draw(self.screen.screen)
+        self.screen.flip()
 
     def render(self):
         self.screen.flip()

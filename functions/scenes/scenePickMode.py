@@ -25,16 +25,16 @@ class PickModeScene(Scene):
             Button(
                 (150, self.screen.screen.get_height() / 2 - 25, 150, 50),
                 "Human vs Human",
-                lambda: self.start_game("h_h"),
-                lambda: self._cycle_buttons(-1),
-                lambda: self._cycle_buttons(1),
+                lambda: self.pick_mode("h_h"),
+                lambda: self.move(-1),
+                lambda: self.move(1),
             ),
             Button(
                 (550, self.screen.screen.get_height() / 2 - 25, 150, 50),
                 "Human vs AI",
-                lambda: self.start_game("h_ai"),
-                lambda: self._cycle_buttons(-1),
-                lambda: self._cycle_buttons(1),
+                lambda: self.pick_mode("h_ai"),
+                lambda: self.move(-1),
+                lambda: self.move(1),
             ),
         ]
         self.activate_button = self.buttons[0]
@@ -42,19 +42,13 @@ class PickModeScene(Scene):
             btn.deactivate()
         self.activate_button.activate()
 
-        # Screen
-        self.screen.fill(white)
-
-        # Draw
-        self.screen.flip()
-
-    def start_game(self, mode):
+    def pick_mode(self, mode):
         from functions.scenes.scenePickCharacter import PickCharacterScene
 
         self.manager.data["mode"] = mode
         self._next_scene = PickCharacterScene(self.manager)
 
-    def _cycle_buttons(self, direction):
+    def move(self, direction):
         current_i = self.buttons.index(self.activate_button)
         for btn in self.buttons:
             btn.deactivate()

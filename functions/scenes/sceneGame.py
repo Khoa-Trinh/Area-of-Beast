@@ -31,9 +31,6 @@ class GameScene(Scene):
             (700, plr_y), (plr_width, plr_height), plr_color, self.clock, "arrow"
         )
 
-        # Draw
-        self.screen.flip()
-
     def handle_events(self, events):
         for e in events:
             if e.type == py.QUIT:

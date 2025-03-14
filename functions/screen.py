@@ -1,12 +1,13 @@
 import pygame as py
 
 from constants.index import height, width, green
+from functions.font import Font
 
 
 class Screen:
     def __init__(self, clock: py.time.Clock):
         self.screen = py.display.set_mode((width, height))
-        self.font = py.font.Font(py.font.match_font("roboto"), 24)
+        self.font = Font(12)
         self.clock = clock
 
     # Methods
@@ -22,5 +23,5 @@ class Screen:
     # FPS
     def get_FPS(self):
         fps = str(int(self.clock.get_fps()))
-        fps_text = self.font.render(f"FPS: {fps}", 1, green)
+        fps_text = self.font.render(f"FPS: {fps}", green)
         self.screen.blit(fps_text, (10, 10))
