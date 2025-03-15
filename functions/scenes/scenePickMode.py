@@ -9,8 +9,7 @@ from components.button import Button
 class PickModeScene(Scene):
     def __init__(self, manager):
         # Initialize clock and screen
-        self.clock = py.time.Clock()
-        self.screen = Screen(self.clock)
+        self.screen = Screen()
         py.display.set_caption("Pick Mode Scene")
 
         # Manager

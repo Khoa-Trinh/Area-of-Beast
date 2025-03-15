@@ -2,7 +2,7 @@ class Scene:
     def handle_events(self, events):
         raise NotImplementedError
 
-    def update(self, dt):
+    def update(self):
         raise NotImplementedError
 
     def render(self):

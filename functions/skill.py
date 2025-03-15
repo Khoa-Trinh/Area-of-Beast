@@ -2,16 +2,46 @@ import pygame as py
 import math as m
 
 from functions.helper import minmax
+from constants.index import skill_properties
 
 
-class Skill1:
+class Skill:
+    def __init__(self):
+        self.skill_activate = False
+        self.skill_last = 0
+        self.skill_cooldown = 0
+        self.skill_repeat_times = 0
+        self.skill_speed = 0
+        self.skill_distance = 0
+
+        raise NotImplementedError
+
+    def action(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def hit_box(self):
+        raise NotImplementedError
+
+    def reset(self):
+        raise NotImplementedError
+
+
+class Skill1(Skill):
     def __init__(self, width, height):
-        # Skill settings
+        # Skill settings(inner)
         self.width = width
         self.height = height
         self.direction = None
         self.distance = None
         self.remaining_distance = None
+
+        # Skill settings(outer)
+        self.skill_activate = False
+        self.skill_last = -skill_properties[0][0]
+        self.skill_cooldown = skill_properties[0][0]
+        self.skill_distance = skill_properties[0][1]
+        self.skill_speed = skill_properties[0][2]
+        self.skill_repeat_times = 0
 
     def action(
         self,
@@ -22,6 +52,7 @@ class Skill1:
         cur_y: int,
         distance: int,
         fps: float,
+        _: int,
     ):
         dx, dy = cur_x - x, cur_y - y
         step = distance / fps
@@ -44,19 +75,36 @@ class Skill1:
             return (
                 minmax(cur_x - self.width / 2, width_limit),
                 minmax(cur_y - self.height / 2, height_limit),
-                True
+                True,
             )
 
         return x, y, False
 
+    def hit_box(self, x: int, y: int):
+        return py.Rect(x, y, self.width * 2, self.height * 2)
 
-class Skill2:
+    def reset(self):
+        self.direction = None
+        self.distance = None
+        self.remaining_distance = None
+
+
+class Skill2(Skill):
     def __init__(self, width, height):
+        # Skill settings(inner)
         self.width = width
         self.height = height
         self.direction = None
         self.distance = None
         self.deviation_values = [-100, 200, -200, 200, -100]
+
+        # Skill settings(outer)
+        self.skill_activate = False
+        self.skill_last = -skill_properties[1][0]
+        self.skill_cooldown = skill_properties[1][0]
+        self.skill_distance = skill_properties[1][1]
+        self.skill_speed = skill_properties[1][2]
+        self.skill_repeat_times = 0
 
     def action(
         self,
@@ -105,4 +153,101 @@ class Skill2:
 
         x = minmax(x + deviated_move_x, width_limit)
         y = minmax(y + deviated_move_y, height_limit)
-        return x, y
+        return x, y, False
+
+    def hit_box(self, x, y):
+        return py.Rect(x, y, self.width * 2, self.height * 2)
+
+    def reset(self):
+        self.direction = None
+        self.distance = None
+
+
+class Skill3(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill4(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill5(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill6(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill7(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill8(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill9(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill10(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill11(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill12(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill13(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill14(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill15(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill16(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill17(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill18(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill19(Skill):
+    def __init__(self):
+        pass
+
+
+class Skill20(Skill):
+    def __init__(self):
+        pass

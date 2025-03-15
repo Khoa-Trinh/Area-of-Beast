@@ -26,10 +26,9 @@ class Button:
         self.rect = py.Rect(rect)
         self.text = text
         self.font = Font(12)
+
         self.base_bg_color = black
         self.base_text_color = white
-
-        # Colors for active state
         self.active_bg_color = white
         self.active_text_color = black
 
@@ -37,16 +36,18 @@ class Button:
 
     def draw(self, screen: py.Surface):
         if self.is_active:
-            bg_color = self.active_bg_color
+            border_padding = 4
+            border_rect = self.rect.inflate(border_padding * 2, border_padding * 2)
+            py.draw.rect(screen, black, border_rect)
+            py.draw.rect(screen, self.active_bg_color, self.rect)
             text_color = self.active_text_color
         else:
-            bg_color = self.base_bg_color
+            py.draw.rect(screen, self.base_bg_color, self.rect)
             text_color = self.base_text_color
 
-        py.draw.rect(screen, bg_color, self.rect)
-        text = self.font.render(self.text, text_color)
-        text_rect = text.get_rect(center=self.rect.center)
-        screen.blit(text, text_rect)
+        text_surface = self.font.render(self.text, text_color)
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        screen.blit(text_surface, text_rect)
 
     def handle_event(self, e):
         if e.type == py.KEYDOWN:

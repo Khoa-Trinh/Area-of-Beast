@@ -20,7 +20,7 @@ class SceneManager:
                 self.active = self.active.next_scene()
 
             except Exception as e:
-                print(e)
+                print("error:", e)
 
         py.quit()
         sys.exit()

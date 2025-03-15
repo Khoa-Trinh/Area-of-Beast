@@ -3,17 +3,16 @@ import pygame as py
 from functions.scenes.sceneBase import Scene
 from functions.screen import Screen
 from functions.scenes.sceneGame import GameScene
-from constants.index import white, position, text, text_character
 from components.text import Text
 from components.button import Button
 from components.box import Box
 from components.counter import Counter
+from constants.index import white, position, text, text_character
 
 
 class PickCharacterScene(Scene):
     def __init__(self, manager):
-        self.clock = py.time.Clock()
-        self.screen = Screen(self.clock)
+        self.screen = Screen()
         py.display.set_caption("Pick Character Scene")
 
         # Manager
@@ -34,8 +33,8 @@ class PickCharacterScene(Scene):
             Text((screen_width / 2 - 50, screen_height / 8 - 25, 100, 50), 18),
             Text((screen_width / 4 - 50, screen_height / 4 - 25, 100, 50), 12),
             Text((screen_width / 4 * 3 - 50, screen_height / 4 - 25, 100, 50), 12),
-            Text((100 + ((195 - 100) / 2), 540, 100, 50), 12),
-            Text((505 + ((195 - 100) / 2), 540, 100, 50), 12),
+            Text((100 + (95 / 2), 540, 100, 50), 12),
+            Text((505 + (95 / 2), 540, 100, 50), 12),
             Text((screen_width / 2 - 50, screen_height / 4 - 25, 100, 50), 18),
         ]
 
@@ -63,8 +62,11 @@ class PickCharacterScene(Scene):
             )
             for pos, text, boxtext in zip(position[10:20], text, text_character)
         ]
+
         self.active_button_left = self.button_left[0]
         self.active_button_right = self.button_right[0]
+        self.active_button_left.activate()
+        self.active_button_right.activate()
 
         self.showcase = [
             Box((30, 365, 335, 175), "", "left"),
@@ -82,7 +84,6 @@ class PickCharacterScene(Scene):
     def start(self):
         self.manager.data["player1"] = self.active_button_left.boxtext[0]
         self.manager.data["player2"] = self.active_button_right.boxtext[0]
-        print(self.manager.data)
         self._next_scene = GameScene(self.manager)
 
     def move(self, direction, pos):
@@ -94,10 +95,16 @@ class PickCharacterScene(Scene):
 
         if pos == "left":
             if self.can_change_character[0]:
+                for button in self.button_left:
+                    button.deactivate()
                 self.active_button_left = buttons[new_index]
+                self.active_button_left.activate()
         else:
             if self.can_change_character[1]:
+                for button in self.button_right:
+                    button.deactivate()
                 self.active_button_right = buttons[new_index]
+                self.active_button_right.activate()
 
     def handle_events(self, events):
         for e in events:
@@ -114,7 +121,7 @@ class PickCharacterScene(Scene):
     def update(self):
         self.screen.fill(white)
 
-        left = self.counter.update(self.screen.screen)
+        left = self.counter.draw(self.screen.screen)
         if left == 0:
             self.start()
 

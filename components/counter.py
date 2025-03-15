@@ -10,7 +10,7 @@ class Counter:
         self.current = 0
         self.font = Font(32)
 
-    def update(self, screen: py.Surface):
+    def draw(self, screen: py.Surface):
       if self.current == 0:
         self.current = py.time.get_ticks()
       elapsed = py.time.get_ticks() - self.current
