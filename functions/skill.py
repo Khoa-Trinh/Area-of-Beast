@@ -22,6 +22,9 @@ class Skill:
     def hit_box(self):
         raise NotImplementedError
 
+    def hit_damage(self):
+        raise NotImplementedError
+
     def reset(self):
         raise NotImplementedError
 
@@ -81,7 +84,10 @@ class Skill1(Skill):
         return x, y, False
 
     def hit_box(self, x: int, y: int):
-        return py.Rect(x, y, self.width * 2, self.height * 2)
+        return py.Rect(x, y, self.width * 3, self.height * 3)
+
+    def hit_damage(self):
+        return 3
 
     def reset(self):
         self.direction = None
@@ -156,7 +162,10 @@ class Skill2(Skill):
         return x, y, False
 
     def hit_box(self, x, y):
-        return py.Rect(x, y, self.width * 2, self.height * 2)
+        return py.Rect(x, y, self.width * 10, self.height * 10)
+
+    def hit_damage(self):
+        return 1
 
     def reset(self):
         self.direction = None

@@ -1,7 +1,6 @@
 import pygame as py
 
 from functions.skill import (
-    Skill,
     Skill1,
     Skill2,
     Skill3,
@@ -24,6 +23,7 @@ from functions.skill import (
     Skill20,
 )
 from functions.helper import minmax
+from functions.skill import Skill
 
 
 class Player:
@@ -44,6 +44,7 @@ class Player:
         self.color = color
         self.clock = clock
         self.move = movement
+        self.health = 100
 
         # Player character
         self.pick_skill(character)
@@ -76,7 +77,10 @@ class Player:
             )
 
     def hurt_box(self):
-        return py.Rect(self.x, self.y, self.width * 2, self.height * 2)
+        return py.Rect(self.x, self.y, self.width * 3, self.height * 3)
+
+    def lose_health(self, damage: int):
+        self.health = max(0, self.health - damage)
 
     def draw(self, screen: py.Surface):
         py.draw.rect(screen, self.color, (self.x, self.y, self.width, self.height))

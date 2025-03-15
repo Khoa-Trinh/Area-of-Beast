@@ -5,6 +5,7 @@ from functions.screen import Screen
 from functions.player import Player
 from functions.helper import match_case_character, get_skills
 from components.skill_box import SkillBox
+from components.health import Health
 from constants.index import white, default_pos, chap
 
 
@@ -41,6 +42,8 @@ class GameScene(Scene):
             for i, char in enumerate(self.characters)
         ]
 
+        self.player_healths = [Health((50, 500)), Health((490, 500))]
+
         self.skill_boxes = []
         positions = [(50, 550), (190, 550), (490, 550), (630, 550)]
         keys = ["C", "V", "<", ">"]
@@ -56,13 +59,18 @@ class GameScene(Scene):
         for e in events:
             if e.type == py.QUIT:
                 self.running = False
+            if e.type == py.KEYDOWN:
+                if e.key == py.K_ESCAPE:
+                    self.running = False
+        for player in self.players:
+            if player.health <= 0:
+                self.running = False
 
     def update(self):
         dt = self.clock.tick(120) / 1000
 
         # Update screen
         self.screen.fill(white)
-        self.screen.get_AfterBurner()
 
         # Update players and skill boxes
         for i, player in enumerate(self.players):
@@ -71,6 +79,13 @@ class GameScene(Scene):
                 self.skill_boxes[i * 2 + j].draw(
                     self.screen.screen, player.cooldown_percent[j]
                 )
+
+        # Update afterburner
+        self.screen.get_AfterBurner()
+
+        # Update health
+        for health, player in zip(self.player_healths, self.players):
+            health.draw(self.screen.screen, player.health)
 
         # Check for collisions
         for attacker_i, defender_i in [(0, 1), (1, 0)]:
@@ -87,9 +102,7 @@ class GameScene(Scene):
                         defender.skill1.skill_activate or defender.skill2.skill_activate
                     )
                 ):
-                    print(
-                        f"Player {attacker_i+1} hit Player {defender_i+1} with skill {i+1}"
-                    )
+                    defender.lose_health(skill.hit_damage())
 
     def render(self):
         self.screen.flip()
