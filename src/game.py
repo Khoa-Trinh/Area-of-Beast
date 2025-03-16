@@ -3,18 +3,19 @@ from characters.player import Player
 from core.input_handler import InputHandler
 from core.collision import handle_collisions
 from ui.hud import HUD
-from utils.constants import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
+from utils.constants import FPS
 
 class Game:
-    def __init__(self):
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    def __init__(self,screen):
+        self.screen = screen
         pygame.display.set_caption("Arena of Beasts")
         self.clock = pygame.time.Clock()
         self.running = True
         self.player1 = Player(100, 300)
         self.player2 = Player(600, 300)
+        self.score=[0,0]
         self.input_handler = InputHandler()
-        self.hud = HUD(self.screen, self.player1.health, self.player2.health)
+        self.hud = HUD(self.screen, self.player1.health, self.player2.health,self.score[0],self.score[1]) 
 
     def run(self):
         while self.running:
@@ -58,8 +59,8 @@ class Game:
         self.player1.update()
         self.player2.update()
         handle_collisions(self.player1, self.player2)
-        self.hud.player_health = self.player1.health
-        self.hud.opponent_health = self.player2.health
+        self.hud.P1_health = self.player1.health
+        self.hud.P2_health = self.player2.health
 
     def render(self):
         self.screen.fill((0, 0, 0))  # Clear screen with black
