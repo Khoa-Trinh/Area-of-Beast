@@ -1,6 +1,7 @@
 import pygame as py
 
 from functions.skill import (
+    Skill,
     Skill1,
     Skill2,
     Skill3,
@@ -22,8 +23,9 @@ from functions.skill import (
     Skill19,
     Skill20,
 )
-from functions.helper import minmax
-from functions.skill import Skill
+from components.pointer import Pointer
+from components.damage_counter import DamageCounter
+from functions.helper import minmax, approach_angle, get_box
 
 
 class Player:
@@ -45,6 +47,7 @@ class Player:
         self.clock = clock
         self.move = movement
         self.health = 100
+        self.direction = 0 if self.move == "wasd" else 180
 
         # Player character
         self.pick_skill(character)
@@ -53,6 +56,12 @@ class Player:
         self.can_move = True
         self.can_use_skill = True
         self.cooldown_percent = [1, 1]
+
+        # Player pointer
+        self.pointer = Pointer(position, size, color)
+
+        # Player damage counter
+        self.damage_counter = DamageCounter(position, size)
 
         # Player skills
         self.skill1: Skill
@@ -77,51 +86,73 @@ class Player:
             )
 
     def hurt_box(self):
-        return py.Rect(self.x, self.y, self.width * 3, self.height * 3)
+        return get_box((self.x, self.y), (self.width, self.height), 4)
 
     def lose_health(self, damage: int):
         self.health = max(0, self.health - damage)
+        self.damage_counter.trigger(damage)
 
     def draw(self, screen: py.Surface):
+        self.pointer.draw(screen, self.x, self.y, self.direction)
+        self.damage_counter.draw(screen, self.x, self.y)
         py.draw.rect(screen, self.color, (self.x, self.y, self.width, self.height))
 
-    def action(self, screen: py.Surface, dt: float):
-        self.movement(screen, dt)
-        self.skill(screen)
-
-    def movement(self, screen: py.Surface, dt: float, velo=200):
+    def action(self, screen: py.Surface):
         key = py.key.get_pressed()
+        fps = max(1, int(self.clock.get_fps()))
+        self.movement(screen, key, fps)
+        self.skill(screen, key, fps)
+
+    def movement(self, screen: py.Surface, key: py.key.ScancodeWrapper, fps: int):
         width_limit = (0, screen.get_width() - self.width)
         height_limit = (0, screen.get_height() - self.height)
+        velo = 200
 
         if self.can_move:
             directions = {
                 "wasd": {
-                    py.K_a: (-velo * dt, 0),
-                    py.K_d: (velo * dt, 0),
-                    py.K_w: (0, -velo * dt),
-                    py.K_s: (0, velo * dt),
+                    (py.K_a, py.K_w): (135, -1, -1),
+                    (py.K_a, py.K_s): (225, -1, 1),
+                    (py.K_d, py.K_w): (45, 1, -1),
+                    (py.K_d, py.K_s): (315, 1, 1),
+                    py.K_a: (180, -1, 0),
+                    py.K_d: (0, 1, 0),
+                    py.K_w: (90, 0, -1),
+                    py.K_s: (270, 0, 1),
                 },
                 "arrow": {
-                    py.K_LEFT: (-velo * dt, 0),
-                    py.K_RIGHT: (velo * dt, 0),
-                    py.K_UP: (0, -velo * dt),
-                    py.K_DOWN: (0, velo * dt),
+                    (py.K_LEFT, py.K_UP): (135, -1, -1),
+                    (py.K_LEFT, py.K_DOWN): (225, -1, 1),
+                    (py.K_RIGHT, py.K_UP): (45, 1, -1),
+                    (py.K_RIGHT, py.K_DOWN): (315, 1, 1),
+                    py.K_LEFT: (180, -1, 0),
+                    py.K_RIGHT: (0, 1, 0),
+                    py.K_UP: (90, 0, -1),
+                    py.K_DOWN: (270, 0, 1),
                 },
             }
-            for key_code, (dx, dy) in directions.get(self.move, {}).items():
-                if key[key_code]:
-                    self.x = minmax(self.x + dx, width_limit)
-                    self.y = minmax(self.y + dy, height_limit)
+
+            move_keys = directions[self.move]
+            for keys, (angle, dx, dy) in move_keys.items():
+                if isinstance(keys, tuple):
+                    if all(key[k] for k in keys):
+                        self.x = minmax(self.x + dx * velo / fps, width_limit)
+                        self.y = minmax(self.y + dy * velo / fps, height_limit)
+                        self.direction = approach_angle(self.direction, angle, 3)
+                        break
+                elif key[keys]:
+                    self.x = minmax(self.x + dx * velo / fps, width_limit)
+                    self.y = minmax(self.y + dy * velo / fps, height_limit)
+                    self.direction = approach_angle(self.direction, angle, 3)
+                    break
 
         self.draw(screen)
 
-    def skill(self, screen: py.Surface):
+    def skill(self, screen: py.Surface, key: py.key.ScancodeWrapper, fps: int):
         # Variables
-        key = py.key.get_pressed()
+        width_limit = (0, screen.get_width() - self.width)
+        height_limit = (0, screen.get_height() - self.height)
         current_time = py.time.get_ticks()
-        cur_x, cur_y = py.mouse.get_pos()
-        fps = int(self.clock.get_fps())
 
         skill_keys = {
             "wasd": (py.K_c, py.K_v),
@@ -151,14 +182,13 @@ class Player:
 
             if skill.skill_repeat_times > 0:
                 self.x, self.y, stop = skill.action(
-                    screen,
                     self.x,
                     self.y,
-                    cur_x,
-                    cur_y,
+                    self.direction,
                     skill.skill_distance,
                     speed,
                     speed - skill.skill_repeat_times if i == 1 else 0,
+                    (width_limit, height_limit),
                 )
                 self.draw(screen)
                 skill.skill_activate = True

@@ -24,15 +24,17 @@ class GameScene(Scene):
         self.manager = manager
         self.player_picks = [self.manager.data["player1"], self.manager.data["player2"]]
         self.characters = [match_case_character(pick) for pick in self.player_picks]
-
-        # Screen
-        self.screen.fill(white)
+        self.save_data = self.manager.data.get("player", None)
 
         # Create Players
         controls = ["wasd", "arrow"]
         self.players = [
             Player(
-                default_pos[i],
+                (
+                    (self.save_data[i][0], self.save_data[i][1])
+                    if self.save_data is not None
+                    else default_pos[i]
+                ),
                 (chap[char][0], chap[char][1]),
                 chap[char][2],
                 self.clock,
@@ -41,6 +43,11 @@ class GameScene(Scene):
             )
             for i, char in enumerate(self.characters)
         ]
+
+        if self.save_data is not None:
+            for i, player in enumerate(self.players):
+                player.direction = self.save_data[i][2]
+                player.health = self.save_data[i][3]
 
         self.player_healths = [Health((50, 500)), Health((490, 500))]
 
@@ -61,20 +68,35 @@ class GameScene(Scene):
                 self.running = False
             if e.type == py.KEYDOWN:
                 if e.key == py.K_ESCAPE:
-                    self.running = False
+                    from functions.scenes.scenePause import PauseScene
+
+                    self.manager.data["player"] = [
+                        (
+                            player.x,
+                            player.y,
+                            player.direction,
+                            player.health,
+                        )
+                        for player in self.players
+                    ]
+                    self._next_scene = PauseScene(self.manager)
+
         for player in self.players:
             if player.health <= 0:
-                self.running = False
+                from functions.scenes.sceneGameover import GameOverScene
+
+                self.manager.data.clear()
+                self._next_scene = GameOverScene(self.manager)
 
     def update(self):
-        dt = self.clock.tick(120) / 1000
+        self.clock.tick(120)
 
         # Update screen
         self.screen.fill(white)
 
         # Update players and skill boxes
         for i, player in enumerate(self.players):
-            player.action(self.screen.screen, dt)
+            player.action(self.screen.screen)
             for j in range(2):
                 self.skill_boxes[i * 2 + j].draw(
                     self.screen.screen, player.cooldown_percent[j]
@@ -109,54 +131,3 @@ class GameScene(Scene):
 
     def next_scene(self):
         return self._next_scene
-
-
-# player_1_1_hit_box: py.Rect = self.players[0].skill1.hit_box(
-#     self.players[0].x, self.players[0].y
-# )
-# player_1_2_hit_box: py.Rect = self.players[0].skill2.hit_box(
-#     self.players[0].x, self.players[0].y
-# )
-# player_2_1_hit_box: py.Rect = self.players[1].skill1.hit_box(
-#     self.players[1].x, self.players[1].y
-# )
-# player_2_2_hit_box: py.Rect = self.players[1].skill2.hit_box(
-#     self.players[1].x, self.players[1].y
-# )
-
-# if (
-#     player_1_1_hit_box.colliderect(self.players[1].hurt_box())
-#     and self.players[0].skill1.skill_activate
-#     and not (
-#         self.players[1].skill1.skill_activate
-#         or self.players[1].skill2.skill_activate
-#     )
-# ):
-#     print("Player 1 hit Player 2 with skill 1")
-# if (
-#     player_1_2_hit_box.colliderect(self.players[1].hurt_box())
-#     and self.players[0].skill2.skill_activate
-#     and not (
-#         self.players[1].skill1.skill_activate
-#         or self.players[1].skill2.skill_activate
-#     )
-# ):
-#     print("Player 1 hit Player 2 with skill 2")
-# if (
-#     player_2_1_hit_box.colliderect(self.players[0].hurt_box())
-#     and self.players[1].skill1.skill_activate
-#     and not (
-#         self.players[0].skill1.skill_activate
-#         or self.players[0].skill1.skill_activate
-#     )
-# ):
-#     print("Player 2 hit Player 1 with skill 1")
-# if (
-#     player_2_2_hit_box.colliderect(self.players[0].hurt_box())
-#     and self.players[1].skill2.skill_activate
-#     and not (
-#         self.players[0].skill1.skill_activate
-#         or self.players[0].skill1.skill_activate
-#     )
-# ):
-#     print("Player 2 hit Player 1 with skill 2")

@@ -1,5 +1,6 @@
 import pygame as py
 import sys
+import traceback
 
 from functions.scenes.sceneBase import Scene
 
@@ -19,8 +20,8 @@ class SceneManager:
                 self.active.render()
                 self.active = self.active.next_scene()
 
-            except Exception as e:
-                print("error:", e)
+            except Exception as _:
+                traceback.print_exc()
 
         py.quit()
         sys.exit()
