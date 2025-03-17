@@ -80,7 +80,7 @@ class Player:
                     py.K_DOWN: (270, 0, 1),
                 },
             }
-
+s
             move_keys = directions[self.move]
             for keys, (angle, dx, dy) in move_keys.items():
                 if isinstance(keys, tuple):
