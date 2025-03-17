@@ -106,6 +106,7 @@ class Background():
         self.surface = screen.copy()
 
 
+
 class newSprite(pygame.sprite.Sprite):
     def __init__(self, filename, frames=1):
         pygame.sprite.Sprite.__init__(self)   # super.__init__(self)
