@@ -1,5 +1,9 @@
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
+import pygame
+
+pygame.init()
+info = pygame.display.Info()
+SCREEN_WIDTH = info.current_w
+SCREEN_HEIGHT = info.current_h
 FPS = 60
 
 # Colors
@@ -24,5 +28,5 @@ HURTBOX_WIDTH = 50
 HURTBOX_HEIGHT = 50
 
 # Game settings
-MAX_HEALTH = 130
+MAX_HEALTH = 100
 DAMAGE = 10
