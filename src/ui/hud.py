@@ -11,7 +11,7 @@ class HUD:
         self.P1_score = P1_score
         self.P2_score = P2_score
         self.font = pygame.font.Font('assets/fonts/game_font.ttf', 24)
-        
+
 
     def draw_score(self):
         P1_img = self.font.render(f"P1: {self.P1_score}", True, RED)
@@ -25,7 +25,7 @@ class HUD:
 
     def draw_health_bars(self):
         P1_health_bar = pygame.Rect(20, 50, 300, 20)
-        P2_health_bar = pygame.Rect(1920-320, 50, 300, 20)
+        P2_health_bar = pygame.Rect(-320, 50, 300, 20)
 
         # Draw player health bar
         pygame.draw.rect(self.screen, RED , P1_health_bar)
