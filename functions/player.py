@@ -8,10 +8,9 @@ class Player:
         self,
         position: tuple[int, int],
         clock: py.time.Clock,
-        movement: str,
+        player: int,
         character: int,
         health: int
-
     ):
         # Player settings
         self.x = position[0]
@@ -19,18 +18,38 @@ class Player:
         self.height = size[0]#constant
         self.width = size[1]#constant
         self.clock = clock
-        self.move = movement
-        self.health = 100
-        self.direction = 1 if self.move == "wasd" else -1
-        # Player movement
-        self.can_move = True
-        self.can_use_skill = True
-        self.cooldown_percent = [1, 1]
-
+        self.player = player
+        self.health = health
+        self.direction = 1 if self.player == 1 else 0
+        self.action = 0  # 0: idle, 1: walk, 2: jumpsquat, 3: jump, 4: fall, 5: crouch
+         # Animation
+        self.size = 64  # Kích thước mỗi frame trong sprite sheet (giả định)
+        self.image_scale = 2  # Tỷ lệ phóng to hình ảnh
+        self.offset = (0, 0)  # Offset để căn chỉnh hình ảnh
+        sprite_sheet = py.image.load("assets/characters/character.png").convert_alpha()
+        animation_steps = [4,4,4,4]
+        self.animation_list = self.load_images(sprite_sheet, animation_steps)
+        self.action = 0  # 0: idle, 1: crouch, 2: walk, 3: jumpsquat,4: jump, 5: crouch
+        self.frame_index = 0
+        self.image = self.animation_list[self.action][self.frame_index]
+        self.update_time = py.time.get_ticks()
 
         # Player damage counter
         self.damage_counter = DamageCounter(position, size)
 
+    def load_images(self, sprite_sheet, animation_steps,rc: tuple[int,int]):
+        animation_list = []
+        target_size = (64, 68)
+        for y, steps in enumerate(animation_steps):
+            temp_img_list = []
+            for x in range(steps):
+                frame_width = sprite_sheet.get_width() // rc[0]
+                frame_height = sprite_sheet.get_height() // rc[1]
+                temp_img = sprite_sheet.subsurface(x * frame_width, y * frame_height, frame_width, frame_height)
+                scaled_img = py.transform.scale(temp_img, target_size)
+                temp_img_list.append(scaled_img)
+            animation_list.append(temp_img_list)
+        return animation_list
     def hurt_box(self):
         return get_box((self.x, self.y), (self.width, self.height), 4)
     def attack_hitbox(self):
@@ -52,50 +71,18 @@ class Player:
         self.movement(screen, key, fps)
         self.skill(screen, key, fps)
 
+    def handle_input(self,key: py.key.ScancodeWrapper):
+        if key[py.K_s] and self.is_jumping == False and self.is_attacking == False:
+            self.is_sitting = True
+            
     def movement(self, screen: py.Surface, key: py.key.ScancodeWrapper, fps: int):
         width_limit = (0, screen.get_width() - self.width)
         height_limit = (0, screen.get_height() - self.height)
-        velo = 200
-
-        if self.can_move:
-            directions = {
-                "wasd": {
-                    (py.K_a, py.K_w): (135, -1, -1),
-                    (py.K_a, py.K_s): (225, -1, 1),
-                    (py.K_d, py.K_w): (45, 1, -1),
-                    (py.K_d, py.K_s): (315, 1, 1),
-                    py.K_a: (180, -1, 0),
-                    py.K_d: (0, 1, 0),
-                    py.K_w: (90, 0, -1),
-                    py.K_s: (270, 0, 1),
-                },
-                "arrow": {
-                    (py.K_LEFT, py.K_UP): (135, -1, -1),
-                    (py.K_LEFT, py.K_DOWN): (225, -1, 1),
-                    (py.K_RIGHT, py.K_UP): (45, 1, -1),
-                    (py.K_RIGHT, py.K_DOWN): (315, 1, 1),
-                    py.K_LEFT: (180, -1, 0),
-                    py.K_RIGHT: (0, 1, 0),
-                    py.K_UP: (90, 0, -1),
-                    py.K_DOWN: (270, 0, 1),
-                },
-            }
-s
-            move_keys = directions[self.move]
-            for keys, (angle, dx, dy) in move_keys.items():
-                if isinstance(keys, tuple):
-                    if all(key[k] for k in keys):
-                        self.x = minmax(self.x + dx * velo / fps, width_limit)
-                        self.y = minmax(self.y + dy * velo / fps, height_limit)
-                        self.direction = approach_angle(self.direction, angle, 3)
-                        break
-                elif key[keys]:
-                    self.x = minmax(self.x + dx * velo / fps, width_limit)
-                    self.y = minmax(self.y + dy * velo / fps, height_limit)
-                    self.direction = approach_angle(self.direction, angle, 3)
-                    break
-        self.draw(screen)
-
+    def jumping
+        
+    def draw(self, screen: py.Surface):
+        self.damage_counter.draw(screen, self.x, self.y)
+        py.draw.rect(screen, self.color, (self.x, self.y, self.width, self.height))
     # def skill(self, screen: py.Surface, key: py.key.ScancodeWrapper, fps: int):
     #     # Variables
     #     width_limit = (0, screen.get_width() - self.width)
