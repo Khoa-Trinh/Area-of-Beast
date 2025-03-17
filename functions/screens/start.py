@@ -1,11 +1,10 @@
 import pygame as py
 
 from functions.screens.base import Base
-from functions.screens.screen import Screen
 from functions.helpers.move import move
+from functions.helpers.quit import quit
 from components.button import Button
-from components.text import Text
-from constants.button import button_size, button_margin
+from constants.index import button_size, button_margin
 
 
 class StartScene(Base):
@@ -48,7 +47,7 @@ class StartScene(Base):
                     button_size[1],
                 ),
                 "Quit Game",
-                lambda: self.quit(),
+                lambda: quit(self),
                 lambda: move(self, -1),
                 lambda: move(self, 1),
             ),
@@ -61,13 +60,10 @@ class StartScene(Base):
     def start(self):
         from functions.screens.mode import ModeScene
 
-        self._next_scene = ModeScene(self.manager)
+        super().start(ModeScene)
 
     def setting(self):
         pass
-
-    def quit(self):
-        self.running = False
 
     def handle_events(self, events):
         super().handle_events(events)

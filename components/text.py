@@ -10,11 +10,11 @@ class Text:
         self.text = ""
         self.font = Font(size)
         self.bg = white
-        self.text = black
+        self.text_color = black
 
     def draw(self, screen: py.Surface):
-        py.draw.rect(screen, self.bg_color, self.rect)
-        text = self.font.render(self.text, self.text_color)
+        py.draw.rect(screen, self.bg, self.rect)
+        text = self.font.draw(self.text, self.text_color)
         text_rect = text.get_rect(center=self.rect.center)
         screen.blit(text, text_rect)
 
