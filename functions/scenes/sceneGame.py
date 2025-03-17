@@ -31,15 +31,16 @@ class GameScene(Scene):
         self.players = [
             Player(
                 (
-                    (self.save_data[i][0], self.save_data[i][1])
+                    self.save_data[i][1]
                     if self.save_data is not None
                     else default_pos[i]
                 ),
-                (chap[char][0], chap[char][1]),
-                chap[char][2],
                 self.clock,
                 controls[i],
                 char,
+                (
+                    
+                )
             )
             for i, char in enumerate(self.characters)
         ]
@@ -72,10 +73,12 @@ class GameScene(Scene):
 
                     self.manager.data["player"] = [
                         (
-                            player.x,
-                            player.y,
+                            (player.x,player.y),
                             player.direction,
                             player.health,
+                            player.is_sitting,
+                            #do this 
+
                         )
                         for player in self.players
                     ]
