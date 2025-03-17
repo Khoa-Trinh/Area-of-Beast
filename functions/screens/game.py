@@ -1,6 +1,7 @@
 import pygame as py
 
 from functions.screens.base import Base
+from components.ground import Ground
 
 
 class GameScene(Base):
@@ -10,8 +11,12 @@ class GameScene(Base):
 
         # Manager data
         self.mode = self.manager.data.get("mode", "h_h")
-        self.character = self.manager.data.get("character", ("something", "something"))
+        self.character = self.manager.data.get("characters", ("something", "something"))
         self.map = self.manager.data.get("map", "city")
+        print(self.character)
+
+        # Ground
+        self.ground = Ground(self.map, self.width, self.height)
 
         # Create players
 
@@ -32,8 +37,13 @@ class GameScene(Base):
     def update(self):
         super().update()
 
+        fps = self.clock.get_fps()
+
         # AfterBurner
         self.screen.get_AfterBurner()
+
+        # Update ground
+        self.ground.draw(self.screen.surface, fps)
 
     def render(self):
         super().render()
