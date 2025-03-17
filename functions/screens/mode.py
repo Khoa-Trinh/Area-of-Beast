@@ -3,6 +3,7 @@ import pygame as py
 from functions.screens.base import Base
 from functions.helpers.move import move
 from components.button import Button
+from constants.button import button_size, button_margin
 
 
 class ModeScene(Base):
@@ -12,10 +13,14 @@ class ModeScene(Base):
 
         # UI
         # Buttons
-        button = (150, 50)
         self.buttons = [
             Button(
-                (button[0], (self.height - button[1]) / 2, button[0], button[1]),
+                (
+                    button_margin[1],
+                    (self.height - button_size[1]) / 2,
+                    button_size[0],
+                    button_size[1],
+                ),
                 "Human vs Human",
                 lambda: self.pick_mode("h_h"),
                 lambda: move(self, -1),
@@ -23,10 +28,10 @@ class ModeScene(Base):
             ),
             Button(
                 (
-                    self.width - button[0] * 2,
-                    (self.height - button[1]) / 2,
-                    button[0],
-                    button[1],
+                    self.width - button_size[0] - button_margin[1],
+                    (self.height - button_size[1]) / 2,
+                    button_size[0],
+                    button_size[1],
                 ),
                 "Human vs AI",
                 lambda: self.pick_mode("h_ai"),

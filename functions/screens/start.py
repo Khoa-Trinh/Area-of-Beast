@@ -5,6 +5,7 @@ from functions.screens.screen import Screen
 from functions.helpers.move import move
 from components.button import Button
 from components.text import Text
+from constants.button import button_size, button_margin
 
 
 class StartScene(Base):
@@ -14,14 +15,13 @@ class StartScene(Base):
 
         # UI
         # Buttons
-        button = (150, 50)
         self.buttons = [
             Button(
                 (
-                    button[0],
-                    (self.height - button[1]) / 2,
-                    button[0],
-                    button[1],
+                    button_margin[0],
+                    (self.height - button_size[1]) / 2,
+                    button_size[0],
+                    button_size[1],
                 ),
                 "Start Game",
                 lambda: self.start(),
@@ -30,10 +30,10 @@ class StartScene(Base):
             ),
             Button(
                 (
-                    (self.width - button[0]) / 2,
-                    (self.height - button[1]) / 2,
-                    button[0],
-                    button[1],
+                    (self.width - button_size[0]) / 2,
+                    (self.height - button_size[1]) / 2,
+                    button_size[0],
+                    button_size[1],
                 ),
                 "Settings",
                 lambda: self.setting(),
@@ -42,10 +42,10 @@ class StartScene(Base):
             ),
             Button(
                 (
-                    self.width - button[0] * 2,
-                    (self.height - button[1]) / 2,
-                    button[0],
-                    button[1],
+                    self.width - button_size[0] - button_margin[0],
+                    (self.height - button_size[1]) / 2,
+                    button_size[0],
+                    button_size[1],
                 ),
                 "Quit Game",
                 lambda: self.quit(),
