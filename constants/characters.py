@@ -1,4 +1,5 @@
 size = (50, 50)
+GRAVITY=8
 position = [
     # Left
     ((180, 540), size),
