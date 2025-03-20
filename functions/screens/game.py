@@ -81,6 +81,21 @@ class GameScene(Base):
         self.players[1].handle_input(self.screen.surface, self.players[0])
         self.players[0].update(self.screen.surface, self.players[1])
         self.players[1].update(self.screen.surface, self.players[0])
+        p1_attacking = self.players[0].is_attacking and self.players[0].hitbox
+        p2_attacking = self.players[1].is_attacking and self.players[1].hitbox
+        if p1_attacking and p2_attacking:
+            # Nếu cả hai cùng tấn công và hitbox giao nhau
+            if self.players[0].hitbox.colliderect(self.players[1].hurtbox) and self.players[1].hitbox.colliderect(self.players[0].hurtbox):
+                self.players[0].handle_collision(self.players[1])
+                self.players[1].handle_collision(self.players[0])
+            elif self.players[0].hitbox.colliderect(self.players[1].hurtbox):
+                self.players[0].handle_collision(self.players[1])
+            elif self.players[1].hitbox.colliderect(self.players[0].hurtbox):
+                self.players[1].handle_collision(self.players[0])
+        elif p1_attacking and self.players[0].hitbox.colliderect(self.players[1].hurtbox):
+                self.players[0].handle_collision(self.players[1])
+        elif p2_attacking and self.players[1].hitbox.colliderect(self.players[0].hurtbox):
+                self.players[1].handle_collision(self.players[0])
         for player in self.players:
             player.draw(self.screen.surface)
         self.screen.get_AfterBurner()
