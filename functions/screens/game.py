@@ -43,6 +43,7 @@ class GameScene(Base):
             )
             for i, char in enumerate(self.character)
         ]
+   #     self.players[0].debug_attack_frame()
 
     def start(self):
         from functions.screens.pause import PauseScene
