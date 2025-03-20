@@ -3,6 +3,7 @@ import pygame as py
 from functions.screens.base import Base
 from components.ground import Ground
 from functions.players.main import Player
+from functions.players.ai_controller import AIController
 P_WIDTH = 27.5
 P_HEIGHT = 43.5
 class GameScene(Base):
@@ -45,7 +46,10 @@ class GameScene(Base):
             for i, char in enumerate(self.character)
         ]
    #     self.players[0].debug_attack_frame()
-
+        if self.mode == "h_ai":
+            self.ai_controller = AIController(self.players[1], self.players[0])
+        else:
+            self.ai_controller = None
     def start(self):
         from functions.screens.pause import PauseScene
 
@@ -80,7 +84,13 @@ class GameScene(Base):
             self.players[1].direction = 1
 
         self.players[0].handle_input(self.screen.surface, self.players[1])
-        self.players[1].handle_input(self.screen.surface, self.players[0])
+    
+    # Player 2 là AI nếu chế độ "h_ai", ngược lại dùng input người chơi
+        if self.mode == "h_ai" and self.ai_controller:
+            self.ai_controller.update(self.screen.surface)
+        else:
+            self.players[1].handle_input(self.screen.surface, self.players[0])
+        
         self.players[0]._update_hurtbox()
         self.players[1]._update_hurtbox()
 
