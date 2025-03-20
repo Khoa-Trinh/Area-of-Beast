@@ -53,7 +53,7 @@ class GameScene(Base):
                 player.direction,
                 player.health
             )
-            for player in self.player
+            for player in self.players
         ]
         super().start(PauseScene)
 
@@ -69,16 +69,21 @@ class GameScene(Base):
         super().update()
         self.clock.tick(60)
         fps = self.clock.get_fps()
-        self.screen.fill((255,255,255))
-        for player in self.players:
-            player.handle_input(self.screen.surface)
-            player.update(self.screen.surface)
-            player.draw(self.screen.surface)
-        # AfterBurner
-        self.screen.get_AfterBurner()
-
-        # Update ground
+        self.screen.fill((255, 255, 255))
+        if self.players[0].x < self.players[1].x:
+            self.players[0].direction = 1
+            self.players[1].direction = -1
+        else:
+            self.players[0].direction = -1
+            self.players[1].direction = 1
         
+        self.players[0].handle_input(self.screen.surface, self.players[1])
+        self.players[1].handle_input(self.screen.surface, self.players[0])
+        self.players[0].update(self.screen.surface, self.players[1])
+        self.players[1].update(self.screen.surface, self.players[0])
+        for player in self.players:
+            player.draw(self.screen.surface)
+        self.screen.get_AfterBurner()
 
     def render(self):
         super().render()
