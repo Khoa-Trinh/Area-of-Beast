@@ -3,7 +3,8 @@ import pygame as py
 from functions.screens.base import Base
 from components.ground import Ground
 from functions.players.main import Player
-
+P_WIDTH = 27.5
+P_HEIGHT = 43.5
 class GameScene(Base):
     def __init__(self, manager):
         super().__init__(manager)
@@ -80,19 +81,39 @@ class GameScene(Base):
 
         self.players[0].handle_input(self.screen.surface, self.players[1])
         self.players[1].handle_input(self.screen.surface, self.players[0])
-        # if (self.players[0].hurtbox.colliderect(self.players[1].hurtbox) and 
-        #     self.players[0].on_ground and self.players[1].on_ground):
-        #     # If moving toward each other, stop movement
-        #     if self.players[0].v_x > 0 and self.players[0].x < self.players[1].x:
-        #         self.players[0].v_x = 0
-        #     if self.players[0].v_x < 0 and self.players[0].x > self.players[1].x:
-        #         self.players[0].v_x = 0
-        #     if self.players[1].v_x > 0 and self.players[1].x < self.players[0].x:
-        #         self.players[1].v_x = 0
-        #     if self.players[1].v_x < 0 and self.players[1].x > self.players[0].x:
-        #         self.players[1].v_x = 0
-        # self.players[0].update(self.screen.surface, self.players[1])
-        # self.players[1].update(self.screen.surface, self.players[0])
+        self.players[0]._update_hurtbox()
+        self.players[1]._update_hurtbox()
+
+        # Collision check with predicted movement
+        p0_next_x = self.players[0].x + self.players[0].v_x
+        p1_next_x = self.players[1].x + self.players[1].v_x
+        p0_next_hurtbox = py.Rect(
+            p0_next_x, self.players[0].hurtbox.y, 
+            self.players[0].hurtbox.width, self.players[0].hurtbox.height
+        )
+        p1_next_hurtbox = py.Rect(
+            p1_next_x, self.players[1].hurtbox.y, 
+            self.players[1].hurtbox.width, self.players[1].hurtbox.height
+        )
+
+        if (p0_next_hurtbox.colliderect(p1_next_hurtbox) and 
+            self.players[0].on_ground and self.players[1].on_ground):
+            if self.players[0].v_x > 0 and self.players[0].x < self.players[1].x:
+                self.players[0].v_x = 0
+            if self.players[0].v_x < 0 and self.players[0].x > self.players[1].x:
+                self.players[0].v_x = 0
+            if self.players[1].v_x > 0 and self.players[1].x < self.players[0].x:
+                self.players[1].v_x = 0
+            if self.players[1].v_x < 0 and self.players[1].x > self.players[0].x:
+                self.players[1].v_x = 0
+                
+                
+        width_limit = (0, self.screen.surface.get_width() - P_WIDTH * self.players[0].image_scale)
+        height_limit = (0, self.screen.surface.get_height() - P_HEIGHT * self.players[0].image_scale)
+        self.players[0]._apply_physics(width_limit, height_limit)
+        self.players[1]._apply_physics(width_limit, height_limit)
+        
+        
         p1_attacking = self.players[0].is_attacking and self.players[0].hitbox
         p2_attacking = self.players[1].is_attacking and self.players[1].hitbox
         if p1_attacking and p2_attacking:

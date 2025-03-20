@@ -162,7 +162,7 @@ class Player:
             return
 
         # Handle attacks
-        if attack_press and not self.is_attacking:
+        if attack_press and not self.is_attacking and not self.jumpsquatting:
             if self.is_sitting:
                 self.is_attacking = True
                 self.forward_crouch = rpress if self.direction == 1 else lpress
@@ -206,11 +206,11 @@ class Player:
                 self.update_action(ACTIONS['JUMPSQUAT'])
 
         if self.jumpsquatting:
+
             self.jumpsquatframes += 1
             if self.jumpsquatframes >= JUMPSQUAT_FRAMES:
                 self.jump()
 
-        self._apply_physics(width_limit, height_limit)
 
     def _apply_physics(self, width_limit, height_limit):
         """Apply physics calculations and boundary checks"""
