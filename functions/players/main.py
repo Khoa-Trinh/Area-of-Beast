@@ -4,7 +4,7 @@ from constants.characters import GRAVITY
 # Constants to replace magic numbers
 SPEED = 11
 NORMAL_ATTACK_DAMAGE = 10
-CROUCH_ATTACK_DAMAGE = 2
+CROUCH_ATTACK_DAMAGE = 1
 P_WIDTH = 27.5
 P_HEIGHT = 43.5
 PCROUCH_HEIGHT = 31.5
@@ -72,7 +72,7 @@ class Player:
 
         # Animation settings
         self.size = 64
-        self.image_scale = 2
+        self.image_scale = 3
         self.offset = (19.2, 20)
         sprite_sheet = py.image.load("assets/images/character.png").convert_alpha()
         sprite_sheet_wide = py.image.load("assets/images/character_wide.png").convert_alpha()
@@ -102,7 +102,7 @@ class Player:
         self.block_count = 0
         self.block_meter = 0
         self.guard_broken = False
-        
+        self.has_hit = False  # Flag to prevent multiple hits in one normal attack  
         # Control mappings (cached)
         self._setup_controls()
 
@@ -166,6 +166,8 @@ class Player:
             if self.is_sitting:
                 self.is_attacking = True
                 self.forward_crouch = rpress if self.direction == 1 else lpress
+                if self.forward_crouch:
+                    self.v_x = 5 * self.direction
                 self.update_action(ACTIONS['CROUCH_ATTACK'])
             elif self.on_ground:
                 self.is_attacking = True
@@ -240,7 +242,7 @@ class Player:
         self.update_action(ACTIONS['JUMP'])
 
     def update_action(self, new_action):
-        if new_action != self.action:
+        if new_action != self.action or self.hit_stunned or self.block_stunned:
             self.action = new_action
             self.offset = OFFSET_VALUES[self.action]
             self.frame_index = 0
@@ -256,32 +258,29 @@ class Player:
             
             if self.frame_index >= frames_in_action:
                 self.frame_index = 0
-                
-                # Handle end of animation states
                 if self.action in (ACTIONS['ATTACK'], ACTIONS['CROUCH_ATTACK']):
                     self.is_attacking = False
                     self.hitbox = None
                     self.forward_crouch = False
+                    if self.action == ACTIONS['ATTACK']:
+                        self.has_hit = False  # Reset only for normal attack
                     self.update_action(ACTIONS['CROUCH'] if self.is_sitting else ACTIONS['IDLE'])
                 elif self.action == ACTIONS['HIT_STUN']:
                     self.hit_stunned = False
-                    self.v_x = 0  # Dừng vận tốc khi hết hit stun
+                    self.v_x = 0
                     self.update_action(ACTIONS['IDLE'])
                 elif self.action == ACTIONS['BLOCKSTUN']:
                     self.block_stunned = False
-                    self.v_x = 0  # Dừng vận tốc khi hết block stun
+                    self.v_x = 0
                     self.update_action(ACTIONS['IDLE'])
                     
             self.update_time = current_time
-
-            # Create hitbox at the right frame of attack animations
-            self._update_hitbox()
 
         self.image = self.animation_list[self.action][self.frame_index]
 
     def _update_hitbox(self):
         """Update hitbox based on current animation and frame"""
-        if self.action == ACTIONS['ATTACK'] and self.frame_index == 5:
+        if self.action == ACTIONS['ATTACK'] and self.frame_index == 5 and not self.has_hit:
             if self.direction == 1:
                 self.hitbox = py.Rect(self.hurtbox.right, 
                                      self.hurtbox.centery - HITBOX_HEIGHT*self.image_scale // 2,
@@ -290,7 +289,8 @@ class Player:
                 self.hitbox = py.Rect(self.hurtbox.left - HITBOX_WIDTH*self.image_scale, 
                                      self.hurtbox.centery - HITBOX_HEIGHT*self.image_scale // 2,
                                      HITBOX_WIDTH*self.image_scale, HITBOX_HEIGHT*self.image_scale)
-        elif self.action == ACTIONS['CROUCH_ATTACK']:
+        elif (self.action == ACTIONS['CROUCH_ATTACK'] and 
+              self.frame_index in (2, 3, 4, 5)):  # Hitbox active on frames 2, 3, 4, 5
             if self.direction == 1:
                 self.hitbox = py.Rect(self.hurtbox.right, 
                                      self.hurtbox.bottom - CROUCH_HITBOX_HEIGHT*self.image_scale,
@@ -299,8 +299,6 @@ class Player:
                 self.hitbox = py.Rect(self.hurtbox.left - CROUCH_HITBOX_WIDTH*self.image_scale, 
                                      self.hurtbox.bottom - CROUCH_HITBOX_HEIGHT*self.image_scale,
                                      CROUCH_HITBOX_WIDTH*self.image_scale, CROUCH_HITBOX_HEIGHT*self.image_scale)
-            if self.forward_crouch:
-                self.v_x = 5 * self.direction
         else:
             self.hitbox = None
 
@@ -327,26 +325,35 @@ class Player:
     def update(self, screen: py.Surface, opponent=None):
         self._update_hurtbox()
         self.update_animation()
-
+        self._update_hitbox()
+        print(self.player, self.health)
     def handle_collision(self, opponent):
-        if opponent.is_sitting and opponent.action != ACTIONS['CROUCH_ATTACK']:
-            opponent.block_stun(self.direction)
-        else:
-            opponent.hit_stun(self.direction)
-            damage = self.crouch_attackdamage if self.action == ACTIONS['CROUCH_ATTACK'] else self.attackdamage
-            opponent.health -= damage
+        if self.action == ACTIONS['ATTACK'] and not self.has_hit:
+            # Normal attack: Hit once and set flag
+            if opponent.is_sitting and opponent.action != ACTIONS['CROUCH_ATTACK']:
+                opponent.block_stun(self.direction, 5)
+            else:
+                opponent.hit_stun(self.direction, 22)
+                opponent.health -= self.attackdamage
+            self.has_hit = True  # Prevent further hits this attack
+        elif self.action == ACTIONS['CROUCH_ATTACK']:
+            # Crouch attack: Hit every time on frames 2, 3, 4, 5
+            if opponent.is_sitting and opponent.action != ACTIONS['CROUCH_ATTACK']:
+                opponent.block_stun(self.direction,2.5)
+            else:
+                opponent.hit_stun(self.direction,8)
+                opponent.health -= self.crouch_attackdamage
+    def hit_stun(self, attack_direction,knockback):
+            self.hit_stunned = True
+            self.is_attacking = False
+            self.v_x = knockback * attack_direction 
+            self.update_action(ACTIONS['HIT_STUN'])
+            self.block_count = 0
+            self.block_meter = max(0, self.block_meter - BLOCK_METER_DECREMENT)
 
-    def hit_stun(self, attack_direction):
-        self.hit_stunned = True
-        self.is_attacking = False
-        self.v_x = 20 * attack_direction  # Tăng lực bật lùi từ 10 lên 15
-        self.update_action(ACTIONS['HIT_STUN'])
-        self.block_count = 0
-        self.block_meter = max(0, self.block_meter - BLOCK_METER_DECREMENT)
-
-    def block_stun(self, attack_direction):
-        self.block_stunned = True
-        self.v_x = 5 * attack_direction  # Tăng lực bật lùi từ 2 lên 5 cho block stun
-        self.update_action(ACTIONS['BLOCKSTUN'])
-        self.block_count += 1
-        self.block_meter = min(BLOCK_METER_MAX, self.block_meter + BLOCK_METER_INCREMENT)
+    def block_stun(self, attack_direction, knockback):
+            self.block_stunned = True
+            self.v_x = knockback * attack_direction  # Tăng lực bật lùi từ 2 lên 5 cho block stun
+            self.update_action(ACTIONS['BLOCKSTUN'])
+            self.block_count += 1
+            self.block_meter = min(BLOCK_METER_MAX, self.block_meter + BLOCK_METER_INCREMENT)

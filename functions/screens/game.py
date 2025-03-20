@@ -77,11 +77,22 @@ class GameScene(Base):
         else:
             self.players[0].direction = -1
             self.players[1].direction = 1
-        
+
         self.players[0].handle_input(self.screen.surface, self.players[1])
         self.players[1].handle_input(self.screen.surface, self.players[0])
-        self.players[0].update(self.screen.surface, self.players[1])
-        self.players[1].update(self.screen.surface, self.players[0])
+        # if (self.players[0].hurtbox.colliderect(self.players[1].hurtbox) and 
+        #     self.players[0].on_ground and self.players[1].on_ground):
+        #     # If moving toward each other, stop movement
+        #     if self.players[0].v_x > 0 and self.players[0].x < self.players[1].x:
+        #         self.players[0].v_x = 0
+        #     if self.players[0].v_x < 0 and self.players[0].x > self.players[1].x:
+        #         self.players[0].v_x = 0
+        #     if self.players[1].v_x > 0 and self.players[1].x < self.players[0].x:
+        #         self.players[1].v_x = 0
+        #     if self.players[1].v_x < 0 and self.players[1].x > self.players[0].x:
+        #         self.players[1].v_x = 0
+        # self.players[0].update(self.screen.surface, self.players[1])
+        # self.players[1].update(self.screen.surface, self.players[0])
         p1_attacking = self.players[0].is_attacking and self.players[0].hitbox
         p2_attacking = self.players[1].is_attacking and self.players[1].hitbox
         if p1_attacking and p2_attacking:
@@ -97,6 +108,8 @@ class GameScene(Base):
                 self.players[0].handle_collision(self.players[1])
         elif p2_attacking and self.players[1].hitbox.colliderect(self.players[0].hurtbox):
                 self.players[1].handle_collision(self.players[0])
+        self.players[0].update(self.screen.surface, self.players[1])
+        self.players[1].update(self.screen.surface, self.players[0])
         for player in self.players:
             player.draw(self.screen.surface)
         self.screen.get_AfterBurner()
