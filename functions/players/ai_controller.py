@@ -17,10 +17,10 @@ BLOCK_METER_MAX = 100
 BLOCK_METER_INCREMENT = 20
 BLOCK_METER_DECREMENT = 10
 ACTIONS = {
-    'IDLE': 0, 'CROUCH': 1, 'WALK': 2, 'WALKBACK': 3, 'JUMP': 4, 
-    'JUMPSQUAT': 5, 'BLOCKSTUN': 6, 'HIT_STUN': 7, 'ATTACK': 8, 
+    'IDLE': 0, 'CROUCH': 1, 'WALK': 2, 'WALKBACK': 3, 'JUMP': 4,
+    'JUMPSQUAT': 5, 'BLOCKSTUN': 6, 'HIT_STUN': 7, 'ATTACK': 8,
     'CROUCH_ATTACK': 9, 'AIR_ATTACK': 10
-}     
+}
 ANIMATION_STEPS = [4, 4, 4, 4, 4, 4, 1, 2]
 ANIMATION_STEPS_WIDE = [9, 9, 9]
 OFFSET_VALUES = [
@@ -55,10 +55,10 @@ class AIController:
     def __init__(self, player, opponent):
         self.player = player  # AI-controlled character
         self.opponent = opponent  # Human player
-        self.range_inaccuracy = 20  # Distance tolerance
+        self.range_inaccuracy =  12 # Distance tolerance
         self.reaction_frames = 15  # Frames between decisions
         self.frame_counter = 0
-        
+
         # Game plan setup
         self.game_plans = ["FOOTSIES", "ZONING", "RUSHDOWN"]
         self.current_game_plan = random.choice(self.game_plans)
@@ -69,12 +69,12 @@ class AIController:
         """Update AI behavior each frame"""
         self.frame_counter += 1
         self.switch_frames -= 1
-        
+
         # Switch game plan when timer runs out
         if self.switch_frames <= 0:
             self.current_game_plan = random.choice(self.game_plans)
             self.switch_frames = random.randint(100, 300)
-        
+
         # Set optimal range based on game plan
         if self.current_game_plan == "FOOTSIES":
             self.optimal_range = 100
@@ -82,7 +82,7 @@ class AIController:
             self.optimal_range = 150
         elif self.current_game_plan == "RUSHDOWN":
             self.optimal_range = 50
-        
+
         distance = self.player.x - self.opponent.x
         abs_distance = abs(distance)
 
@@ -112,7 +112,7 @@ class AIController:
             if random.random() < 0.5:  # 50% chance to jump
                 self.jump_to_approach(screen)
         elif self.opponent.is_attacking and self.opponent.on_ground:
-            if random.random() < 0.8:  # 80% chance to block
+            if random.random() < 0.8 :  # 80% chance to block
                 self.defend()
             else:
                 self.attack()
@@ -204,7 +204,7 @@ class AIController:
         """Perform an attack, choosing between normal and crouch attack"""
         if self.player.on_ground and self.can_attack():
             if abs(self.player.x - self.opponent.x) < 50 and self.opponent.on_ground:
-                if random.random() < 0.5:  # 50% chance for crouch attack when close
+                if random.random() < 0.8:  # 50% chance for crouch attack when close
                     self.player.is_attacking = True
                     self.player.v_x = 0
                     self.player.update_action(ACTIONS['CROUCH_ATTACK'])
