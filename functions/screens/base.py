@@ -3,7 +3,6 @@ import pygame as py
 from functions.screens.screen import Screen
 from constants.colors import white
 
-
 class Base:
     def __init__(self, manager):
         # Initialize screen and clock
