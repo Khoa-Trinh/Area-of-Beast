@@ -31,7 +31,7 @@ class Base:
             self.running = False
 
     def update(self):
-        self.clock.tick(120)
+        self.clock.tick(60)
         self.screen.fill(white)
 
     def render(self):
