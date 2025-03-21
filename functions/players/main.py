@@ -345,7 +345,6 @@ class Player:
         self._update_hurtbox()
         self.update_animation()
         self._update_hitbox()
-        print(self.player, self.guard_broken)
     def handle_collision(self, opponent):
         if self.action == ACTIONS['ATTACK'] and not self.has_hit:
             # Normal attack: Hit once and set flag

@@ -9,14 +9,13 @@ class Text:
         self.rect = py.Rect(rect)
         self.text = ""
         self.font = Font(size)
-        self.bg = white
         self.text_color = black
 
     def draw(self, screen: py.Surface):
-        py.draw.rect(screen, self.bg, self.rect)
         text = self.font.draw(self.text, self.text_color)
         text_rect = text.get_rect(center=self.rect.center)
         screen.blit(text, text_rect)
+
 
     def change_text(self, screen: py.Surface, text):
         self.text = text

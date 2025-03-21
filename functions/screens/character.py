@@ -87,10 +87,13 @@ class CharacterScene(Base):
 
     def update(self):
         super().update()
-
         left = self.counter.draw(self.screen.surface)
         if left == 0:
             self.start()
+
+        # Auto lock in for AI
+        if self.mode != "h_h" and self.can_change_character[1]:
+            self.can_change_character = (self.can_change_character[0], False)
 
         labels = [
             "Pick Character",
@@ -109,6 +112,12 @@ class CharacterScene(Base):
 
         for item in self.texts + self.button_left + self.button_right + self.boxes:
             item.draw(self.screen.surface)
+
+            for text, label in zip(self.texts, labels):
+                text.change_text(self.screen.surface, label)
+
+            for item in self.texts + self.button_left + self.button_right + self.boxes:
+                item.draw(self.screen.surface)
 
     def render(self):
         super().render()

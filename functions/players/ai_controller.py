@@ -1,6 +1,9 @@
 import pygame as py
 import random
 
+# Constants (được lấy từ Player)
+
+# Constants to replace magic numbers
 SPEED = 11
 NORMAL_ATTACK_DAMAGE = 10
 CROUCH_ATTACK_DAMAGE = 1
@@ -15,7 +18,7 @@ JUMP_POWER = -60
 JUMPSQUAT_FRAMES = 6
 BLOCK_METER_MAX = 100
 BLOCK_METER_INCREMENT = 20
-BLOCK_METER_DECREMENT = 10
+BLOCK_METER_DECREMENT = 1
 ACTIONS = {
     'IDLE': 0, 'CROUCH': 1, 'WALK': 2, 'WALKBACK': 3, 'JUMP': 4,
     'JUMPSQUAT': 5, 'BLOCKSTUN': 6, 'HIT_STUN': 7, 'ATTACK': 8,
@@ -49,14 +52,12 @@ framespeed = [
     14, # CROUCH_ATTACK
     12  # AIR_ATTACK
 ]
-
-
 class AIController:
     def __init__(self, player, opponent):
         self.player = player  # AI-controlled character
         self.opponent = opponent  # Human player
-        self.range_inaccuracy =  12 # Distance tolerance
-        self.reaction_frames = 15  # Frames between decisions
+        self.range_inaccuracy = 15  # Giảm để AI nhạy hơn với khoảng cách
+        self.reaction_frames = 5  # Phản ứng nhanh hơn (từ 10 xuống 5)
         self.frame_counter = 0
 
         # Game plan setup
@@ -65,8 +66,16 @@ class AIController:
         self.switch_frames = random.randint(100, 300)  # Switch plan every 100-300 frames
         self.optimal_range = 100  # Default, will be set by game plan
 
+        # Chỉ sử dụng RUSHDOWN làm chiến thuật duy nhất
+        self.current_game_plan = "RUSHDOWN"
+
+        # Khoảng cách tấn công dựa trên hitbox
+        self.normal_attack_range = HITBOX_WIDTH * self.player.image_scale  # ~285 với scale=3
+        self.crouch_attack_range = CROUCH_HITBOX_WIDTH * self.player.image_scale  # ~90 với scale=3
+        self.optimal_range = self.crouch_attack_range  # RUSHDOWN ưu tiên khoảng cách gần
+
     def update(self, screen):
-        """Update AI behavior each frame"""
+        """Cập nhật hành vi AI mỗi frame"""
         self.frame_counter += 1
         self.switch_frames -= 1
 
@@ -83,149 +92,122 @@ class AIController:
         elif self.current_game_plan == "RUSHDOWN":
             self.optimal_range = 50
 
+
         distance = self.player.x - self.opponent.x
         abs_distance = abs(distance)
 
-        # Update direction
-        if self.player.x < self.opponent.x:
-            self.player.direction = 1
-        else:
-            self.player.direction = -1
+        # Cập nhật hướng
+        self.player.direction = 1 if self.player.x < self.opponent.x else -1
 
-        # Decide action periodically
+        # Quyết định hành động với tần suất nhanh hơn
         if self.frame_counter >= self.reaction_frames:
             self.frame_counter = 0
             self.decide_action(abs_distance, distance, screen)
 
     def decide_action(self, abs_distance, distance, screen):
-        """Decide action based on game plan, distance, and opponent state"""
-        if self.current_game_plan == "FOOTSIES":
-            self.footsies_logic(abs_distance, distance, screen)
-        elif self.current_game_plan == "ZONING":
-            self.zoning_logic(abs_distance, distance, screen)
-        elif self.current_game_plan == "RUSHDOWN":
-            self.rushdown_logic(abs_distance, distance, screen)
+        """Quyết định hành động dựa trên RUSHDOWN"""
+        # Reset trạng thái nếu bị kẹt (dự phòng)
+        if not self.player.on_ground and not self.player.jumpsquatting:
+            self.player.v_x = 0  # Tránh kẹt khi rơi
 
-    def footsies_logic(self, abs_distance, distance, screen):
-        """Maintain optimal range and react"""
-        if not self.opponent.on_ground:
-            if random.random() < 0.5:  # 50% chance to jump
-                self.jump_to_approach(screen)
-        elif self.opponent.is_attacking and self.opponent.on_ground:
-            if random.random() < 0.8 :  # 80% chance to block
-                self.defend()
-            else:
-                self.attack()
-        else:
-            if abs_distance > self.optimal_range + self.range_inaccuracy:
-                self.move_toward_opponent(distance)
-            elif abs_distance < self.optimal_range - self.range_inaccuracy:
-                if random.random() < 0.5:
-                    self.move_away_from_opponent(distance)
+        # Ưu tiên phản ứng khi bị tấn công
+        if self.player.hit_stunned or self.player.block_stunned:
+            if random.random() < 0.8:  # 80% cơ hội phản công sau stun
+                self.counter_attack()
+            return
+
+        # Nếu đối thủ đang tấn công và hitbox gần
+        if self.opponent.is_attacking and self.opponent.hitbox:
+            if self.opponent.hitbox.colliderect(self.player.hurtbox):
+                if random.random() < 0.85:  # 85% cơ hội phòng thủ
+                    self.defend()
                 else:
-                    self.attack()
-            else:  # Within optimal range
-                if random.random() < 0.3:
-                    self.attack()
-                else:  # Random small movement
-                    if random.random() < 0.5:
-                        self.move_toward_opponent(distance)
-                    else:
-                        self.move_away_from_opponent(distance)
+                    self.counter_attack()
+                return
+            elif abs_distance < self.normal_attack_range and random.random() < 0.7:
+                self.counter_attack()  # Phản công nếu gần
+                return
 
-    def zoning_logic(self, abs_distance, distance, screen):
-        """Keep distance and attack when in range"""
-        if not self.opponent.on_ground:
-            if random.random() < 0.3:  # 30% chance to jump
-                self.jump_to_approach(screen)
-        elif self.opponent.is_attacking and self.opponent.on_ground:
-            if random.random() < 0.9:  # 90% chance to block
-                self.defend()
+        # Logic RUSHDOWN: Áp sát và tấn công
+        if abs_distance > self.normal_attack_range + self.range_inaccuracy:
+            self.move_toward_opponent(distance)  # Di chuyển đến khi vào tầm tấn công
+        elif abs_distance > self.crouch_attack_range:
+            if random.random() < 0.9:  # 90% cơ hội tấn công khi trong tầm normal attack
+                self.attack()
             else:
+                self.move_toward_opponent(distance)  # Tiếp tục áp sát
+        else:  # Trong tầm crouch attack
+            if random.random() < 0.95:  # 95% cơ hội tấn công khi rất gần
                 self.attack()
-        else:
-            if abs_distance < 100:  # Too close
-                self.move_away_from_opponent(distance)
-            elif abs_distance < 150:  # Attack range
-                self.attack()
-            else:  # Beyond 150
-                if abs_distance > 200:
-                    self.move_toward_opponent(distance)
-                elif random.random() < 0.2:  # Small chance to adjust
-                    self.move_toward_opponent(distance)
-                elif random.random() < 0.4:
-                    self.move_away_from_opponent(distance)
+            else:
+                self.defend()  # Phòng thủ ngẫu nhiên để tránh bị dự đoán
 
-    def rushdown_logic(self, abs_distance, distance, screen):
-        """Get close and attack aggressively"""
-        if not self.opponent.on_ground:
-            if random.random() < 0.5:  # 50% chance to jump
-                self.jump_to_approach(screen)
-        elif self.opponent.is_attacking and self.opponent.on_ground:
-            if random.random() < 0.5:  # 50% chance to block
-                self.defend()
-            else:
-                self.attack()
-        else:
-            if abs_distance > 50:
-                self.move_toward_opponent(distance)
-            else:
-                self.attack()
+        # Tận dụng khi đối thủ dễ bị tấn công
+        if not self.opponent.on_ground and random.random() < 0.8:  # 80% cơ hội nhảy đuổi
+            self.jump_to_approach(screen)
+            self.attack()
+        elif self.opponent.hit_stunned or self.opponent.block_stunned:
+            self.attack()  # Tấn công ngay khi đối thủ bị stun
 
     def move_toward_opponent(self, distance):
-        """Move towards the opponent"""
-        if not self.player.is_attacking and not self.player.jumpsquatting:
-            if distance > 0:  # Opponent to the right
-                self.player.v_x = -SPEED
-                if self.player.on_ground:
-                    self.player.update_action(ACTIONS['WALKBACK'] if self.player.direction == 1 else ACTIONS['WALK'])
-            else:  # Opponent to the left
-                self.player.v_x = SPEED
-                if self.player.on_ground:
-                    self.player.update_action(ACTIONS['WALK'] if self.player.direction == 1 else ACTIONS['WALKBACK'])
+        """Di chuyển về phía đối thủ"""
+        if not self.player.is_attacking and not self.player.jumpsquatting and not self.player.hit_stunned and not self.player.block_stunned:
+            self.player.v_x = SPEED if distance < 0 else -SPEED
+            if self.player.on_ground:
+                self.player.update_action(ACTIONS['WALK'] if self.player.direction == 1 else ACTIONS['WALKBACK'])
+        else:
+            self.player.v_x = 0  # Reset vận tốc nếu không thể di chuyển
 
     def move_away_from_opponent(self, distance):
-        """Move away from the opponent"""
-        if not self.player.is_attacking and not self.player.jumpsquatting:
-            if distance > 0:  # Opponent to the right
-                self.player.v_x = SPEED
-                if self.player.on_ground:
-                    self.player.update_action(ACTIONS['WALK'] if self.player.direction == 1 else ACTIONS['WALKBACK'])
-            else:  # Opponent to the left
-                self.player.v_x = -SPEED
-                if self.player.on_ground:
-                    self.player.update_action(ACTIONS['WALKBACK'] if self.player.direction == 1 else ACTIONS['WALK'])
+        """Di chuyển ra xa đối thủ (dùng khi cần thiết)"""
+        if not self.player.is_attacking and not self.player.jumpsquatting and not self.player.hit_stunned and not self.player.block_stunned:
+            self.player.v_x = -SPEED if distance < 0 else SPEED
+            if self.player.on_ground:
+                self.player.update_action(ACTIONS['WALKBACK'] if self.player.direction == 1 else ACTIONS['WALK'])
+        else:
+            self.player.v_x = 0
 
     def can_attack(self):
-        """Check if AI can attack"""
-        return not self.player.is_attacking and not self.player.hit_stunned and not self.player.block_stunned
+        """Kiểm tra xem AI có thể tấn công không"""
+        return not self.player.is_attacking and not self.player.hit_stunned and not self.player.block_stunned and self.player.on_ground
 
     def attack(self):
-        """Perform an attack, choosing between normal and crouch attack"""
-        if self.player.on_ground and self.can_attack():
-            if abs(self.player.x - self.opponent.x) < 50 and self.opponent.on_ground:
-                if random.random() < 0.8:  # 50% chance for crouch attack when close
-                    self.player.is_attacking = True
-                    self.player.v_x = 0
-                    self.player.update_action(ACTIONS['CROUCH_ATTACK'])
-                else:
-                    self.player.is_attacking = True
-                    self.player.v_x = 0
-                    self.player.update_action(ACTIONS['ATTACK'])
-            else:
+        """Thực hiện tấn công dựa trên khoảng cách"""
+        if not self.can_attack():
+            return
+
+        abs_distance = abs(self.player.x - self.opponent.x)
+        if abs_distance <= self.crouch_attack_range:
+            self.player.is_attacking = True
+            self.player.v_x = 0
+            self.player.update_action(ACTIONS['CROUCH_ATTACK'])
+        elif abs_distance <= self.normal_attack_range:
+            self.player.is_attacking = True
+            self.player.v_x = 0
+            self.player.update_action(ACTIONS['ATTACK'])
+
+    def counter_attack(self):
+        """Phản công sau khi bị tấn công hoặc chặn"""
+        if self.can_attack():
+            abs_distance = abs(self.player.x - self.opponent.x)
+            if abs_distance <= self.crouch_attack_range:
+                self.player.is_attacking = True
+                self.player.v_x = 0
+                self.player.update_action(ACTIONS['CROUCH_ATTACK'])
+            elif abs_distance <= self.normal_attack_range * 1.2:  # Tăng tầm phản công
                 self.player.is_attacking = True
                 self.player.v_x = 0
                 self.player.update_action(ACTIONS['ATTACK'])
 
     def defend(self):
-        """Defend by crouching"""
+        """Phòng thủ bằng cách ngồi"""
         if self.player.on_ground and not self.player.jumpsquatting and not self.player.guard_broken:
             self.player.is_sitting = True
             self.player.v_x = 0
             self.player.update_action(ACTIONS['CROUCH'])
 
     def jump_to_approach(self, screen):
-        """Jump towards the opponent"""
+        """Nhảy về phía đối thủ"""
         if self.player.on_ground and not self.player.jumpsquatting:
             self.player.jumpsquatting = True
             self.player.jumpsquatframes = 0
