@@ -157,6 +157,7 @@ class GameScene(Base):
             player.draw(self.screen.surface)
             health.draw(self.screen.surface, player.health)
         self.screen.get_AfterBurner()
+        self.clock.tick(60)
 
     def render(self):
         super().render()
