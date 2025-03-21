@@ -1,6 +1,7 @@
 import pygame as py
 
 from functions.helpers.font import Font
+from functions.helpers.image_blit import Image
 from constants.setting import width, height
 from constants.colors import green
 
@@ -10,10 +11,11 @@ class Screen:
         self.surface = py.display.set_mode((width, height))
         self.font = Font(12)
         self.clock = clock
+        self.image = Image("assets/images/background.png", (0, 0))
 
     # Methods
     def fill(self, color: tuple):
-        self.surface.fill(color)
+        self.image.draw(self.surface)
 
     def blit(self, surface: py.Surface, position: tuple):
         self.surface.blit(surface, position)

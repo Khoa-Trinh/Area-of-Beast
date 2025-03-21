@@ -38,7 +38,7 @@ class GameScene(Base):
                 i,
                 char,
                 (
-                    self.save_data[i][3]
+                    self.save_data[i][2]
                     if self.save_data is not None
                     else 100
                 )
@@ -52,8 +52,8 @@ class GameScene(Base):
             self.ai_controller = None
 
         self.health_bar = [
-          Health((10, 10)),
-          Health((self.width - 270, 10))
+          Health((10, 30)),
+          Health((self.width - 270, 30))
         ]
 
     def start(self, scene):
