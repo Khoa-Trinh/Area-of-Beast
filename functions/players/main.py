@@ -16,7 +16,7 @@ JUMP_POWER = -60
 JUMPSQUAT_FRAMES = 6
 BLOCK_METER_MAX = 100
 BLOCK_METER_INCREMENT = 20
-BLOCK_METER_DECREMENT = 10
+BLOCK_METER_DECREMENT = 1
 ACTIONS = {
     'IDLE': 0, 'CROUCH': 1, 'WALK': 2, 'WALKBACK': 3, 'JUMP': 4, 
     'JUMPSQUAT': 5, 'BLOCKSTUN': 6, 'HIT_STUN': 7, 'ATTACK': 8, 
@@ -192,6 +192,14 @@ class Player:
             elif self.on_ground and can_move:
                 self.update_action(ACTIONS['IDLE'])
 
+            self.is_sitting = dpress and not upress and self.on_ground and not self.jumpsquatting and not self.guard_broken
+            if not self.is_sitting and self.block_meter > 0:
+                self.block_meter -= BLOCK_METER_DECREMENT
+                if self.block_meter <= 0:
+                    self.block_meter = 0
+                    self.guard_broken = False
+
+
             if not self.guard_broken:
                 self.is_sitting = dpress and not upress and self.on_ground and not self.jumpsquatting
                 if self.is_sitting:
@@ -199,6 +207,7 @@ class Player:
                     self.update_action(ACTIONS['CROUCH'])
             else:
                 self.is_sitting = False
+
 
             if upress and not dpress and self.on_ground and not self.jumpsquatting and not self.is_sitting:
                 self.jumpsquatting = True
@@ -322,11 +331,21 @@ class Player:
         if self.hitbox:
             py.draw.rect(screen, (0, 255, 0), self.hitbox, 2)
 
+        meter_width = 50
+        meter_height = 5
+        meter_x = self.x + (P_WIDTH * self.image_scale - meter_width) // 2
+        meter_y = self.y - 10
+        py.draw.rect(screen, (255, 255, 255), (meter_x, meter_y, meter_width, meter_height))  # Nền trắng
+        filled_width = (self.block_meter / BLOCK_METER_MAX) * meter_width
+        py.draw.rect(screen, (0, 0, 255), (meter_x, meter_y, filled_width, meter_height))    # Thanh xanh
+        if self.guard_broken:
+            py.draw.rect(screen, (255, 0, 0), (meter_x, meter_y, meter_width, meter_height), 2)  # Viền đỏ khi vỡ khiên
+
     def update(self, screen: py.Surface, opponent=None):
         self._update_hurtbox()
         self.update_animation()
         self._update_hitbox()
-        print(self.player, self.health)
+        print(self.player, self.guard_broken)
     def handle_collision(self, opponent):
         if self.action == ACTIONS['ATTACK'] and not self.has_hit:
             # Normal attack: Hit once and set flag
@@ -348,12 +367,14 @@ class Player:
             self.is_attacking = False
             self.v_x = knockback * attack_direction 
             self.update_action(ACTIONS['HIT_STUN'])
-            self.block_count = 0
-            self.block_meter = max(0, self.block_meter - BLOCK_METER_DECREMENT)
+
 
     def block_stun(self, attack_direction, knockback):
             self.block_stunned = True
             self.v_x = knockback * attack_direction  # Tăng lực bật lùi từ 2 lên 5 cho block stun
             self.update_action(ACTIONS['BLOCKSTUN'])
-            self.block_count += 1
-            self.block_meter = min(BLOCK_METER_MAX, self.block_meter + BLOCK_METER_INCREMENT)
+            self.block_meter += BLOCK_METER_INCREMENT  # Tăng block meter
+            if self.block_meter >= BLOCK_METER_MAX:    # Nếu vượt quá giới hạn
+                self.guard_broken = True
+                self.block_meter = BLOCK_METER_MAX     # Giới hạn tối đa
+            self.update_action(ACTIONS['BLOCKSTUN'])
