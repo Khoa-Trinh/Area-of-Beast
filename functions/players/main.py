@@ -139,7 +139,6 @@ class Player:
         return animation_list
     
     def debug_attack_frame(self):
-        """Set the player to the first frame of the ATTACK action for debugging offsets."""
         self.action = ACTIONS['CROUCH_ATTACK']
         self.frame_index = 1
         self.offset = OFFSET_VALUES[self.action]  # Update offset for ATTACK

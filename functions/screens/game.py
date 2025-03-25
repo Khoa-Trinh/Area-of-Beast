@@ -97,7 +97,6 @@ class GameScene(Base):
 
         self.players[0].handle_input(self.screen.surface, self.players[1])
 
-    # Player 2 là AI nếu chế độ "h_ai", ngược lại dùng input người chơi
         if self.mode == "h_ai" and self.ai_controller:
             self.ai_controller.update(self.screen.surface)
         else:
