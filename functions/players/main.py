@@ -326,9 +326,6 @@ class Player:
              self.y - self.offset[1] * self.image_scale)
         )
         
-        py.draw.rect(screen, (255, 0, 0), self.hurtbox, 2)
-        if self.hitbox:
-            py.draw.rect(screen, (0, 255, 0), self.hitbox, 2)
 
         meter_width = 50
         meter_height = 5
@@ -369,10 +366,10 @@ class Player:
 
     def block_stun(self, attack_direction, knockback):
             self.block_stunned = True
-            self.v_x = knockback * attack_direction  # Tăng lực bật lùi từ 2 lên 5 cho block stun
+            self.v_x = knockback * attack_direction  
             self.update_action(ACTIONS['BLOCKSTUN'])
-            self.block_meter += BLOCK_METER_INCREMENT  # Tăng block meter
-            if self.block_meter >= BLOCK_METER_MAX:    # Nếu vượt quá giới hạn
+            self.block_meter += BLOCK_METER_INCREMENT  
+            if self.block_meter >= BLOCK_METER_MAX:  
                 self.guard_broken = True
-                self.block_meter = BLOCK_METER_MAX     # Giới hạn tối đa
+                self.block_meter = BLOCK_METER_MAX     
             self.update_action(ACTIONS['BLOCKSTUN'])
