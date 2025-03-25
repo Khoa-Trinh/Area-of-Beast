@@ -226,10 +226,8 @@ class Player:
         self.y += self.v_y
         self.x += self.v_x
 
-        # Giảm dần vận tốc ngang khi bị stun để tạo cảm giác bật lùi rồi dừng
         if self.hit_stunned or self.block_stunned:
-            self.v_x *= 0.6  # Ma sát giả lập, giảm 10% mỗi frame
-
+            self.v_x *= 0.6  
         # Boundary checks
         self.x = max(width_limit[0], min(self.x, width_limit[1]))
         if self.x == width_limit[0] or self.x == width_limit[1]:
